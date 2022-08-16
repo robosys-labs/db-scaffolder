@@ -77,7 +77,15 @@ class BuildDBCommand extends Command
     public function handle()
     {
         $sheet = $this->argument('sheet');
+        $pos = strpos($sheet, "sheet=");
+        if ($pos !== false) {
+            $sheet = substr($sheet, 6);
+        }
         $range = $this->argument('range');
+        $pos = strpos($range, "range=");
+        if ($pos !== false) {
+            $range = substr($range, 6);
+        }
         $scaffold = $this->option('scaffold') ?: "generate";
         if ($scaffold === true) {
             return $this->scaffold();

@@ -5,7 +5,7 @@ namespace Robosys\DBScaffolder;
 use Illuminate\Support\ServiceProvider;
 use Robosys\DBScaffolder\Commands\BuildDBCommand;
 
-class DBScaffolderServiceProvider extends ServiceProvider
+class ScaffolderServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
