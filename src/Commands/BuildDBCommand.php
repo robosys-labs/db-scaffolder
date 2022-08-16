@@ -12,7 +12,7 @@ class BuildDBCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'magic {sheet : The google sheet ID to build from} {range : The sheet range e.g. "Sheet1!A1:AT21"} {--scaffold}';
+    protected $signature = 'magic {sheet? : The google sheet ID to build from} {range? : The sheet range e.g. "Sheet1!A1:AT21"} {--scaffold}';
 
     /**
      * The console command description.
@@ -76,20 +76,21 @@ class BuildDBCommand extends Command
      */
     public function handle()
     {
-        $sheet = $this->argument('sheet');
+        $scaffold = $this->option('scaffold') ?: false;
+        if ($scaffold === true) {
+            return $this->scaffold();
+        }
+        $sheet = $this->argument('sheet') ?: false;
         $pos = strpos($sheet, "sheet=");
         if ($pos !== false) {
             $sheet = substr($sheet, 6);
         }
-        $range = $this->argument('range');
+        $range = $this->argument('range') ?: false;
         $pos = strpos($range, "range=");
         if ($pos !== false) {
             $range = substr($range, 6);
         }
-        $scaffold = $this->option('scaffold') ?: "generate";
-        if ($scaffold === true) {
-            return $this->scaffold();
-        }
+        //todo
         $this->generate($sheet, $range);
 
         return 0;
@@ -97,9 +98,14 @@ class BuildDBCommand extends Command
 
     public function scaffold()
     {
-        $this->info("scaffolding...");
-        $out = shell_exec('fun.cmd');
-        $this->info($out);
+        $files = robosys_get_Files("resources/model_schemas");
+        foreach ($files as $f) {
+            $model = $f;
+            $path = "resources/model_schemas/{$model}.json";
+            $this->info("scaffolding... $model");
+            $out = shell_exec('"' . base_path('vendor/robosys-labs/db-scaffolder/fun.cmd') . '"' . " $model $path");
+            $this->info($out);
+        }
     }
 
     public function generate($sheet, $range)
@@ -109,24 +115,24 @@ class BuildDBCommand extends Command
         $i = 0;
         $column = array_column($table, $i);
         $tableName = "";
-        
-        while(!empty($column)) {
+
+        while (!empty($column)) {
             $i++;
             $namefield = "";
-            foreach($column as $idx => $field){
+            foreach ($column as $idx => $field) {
                 if ($idx == 0) {
                     $namefield = Str::singular($field);
                     $tableName = $field;
                     $this->info("Processing relations for table $tableName");
-                    if (!isset($this->relationKeys[$namefield])){
+                    if (!isset($this->relationKeys[$namefield])) {
                         $this->relationKeys[$namefield] = [];
                         $this->relationIntKeys[$namefield] = [];
                     }
                     continue;
                 }
-                foreach($this->relationKeys as $k => $v) {
+                foreach ($this->relationKeys as $k => $v) {
                     //k=user
-                    $relField = $k."_id";
+                    $relField = $k . "_id";
                     $d = explode('_', $namefield);
                     //user_id
                     //relpivot=user_interest_id
@@ -136,9 +142,9 @@ class BuildDBCommand extends Command
                         //field is user_id
                         //field contains user
                         //column contains pivot
-                        if(isset($d[1])) {
-                            $relPivotField1 = $d[0]."_id";
-                            $relPivotField2 = $d[1]."_id";
+                        if (isset($d[1])) {
+                            $relPivotField1 = $d[0] . "_id";
+                            $relPivotField2 = $d[1] . "_id";
                             if (in_array($relPivotField1, $column) && in_array($relPivotField2, $column)) {
                                 $this->relationIntKeys[$k][$relPivotField2] = $tableName;
                             }
@@ -154,26 +160,26 @@ class BuildDBCommand extends Command
         }
         $i = 0;
         $column = array_column($table, $i);
-        while(!empty($column)) {
+        while (!empty($column)) {
             $i++;
             $this->relations = "";
             $entry = "";
             $namefield = "";
-            foreach($column as $idx => $field){
+            foreach ($column as $idx => $field) {
                 if ($idx == 0) {
                     $namefield = Str::singular($field);
                     $tableName = $field;
                     $this->info("Processing  for table $tableName");
                     continue;
                 }
-                if(empty($field) || $field == "id" || $field == 'created_at' || $field == 'updated_at') {
+                if (empty($field) || $field == "id" || $field == 'created_at' || $field == 'updated_at') {
                     continue;
                 }
                 $entry .= $this->buildEntry($field, $tableName);
             }
             if (isset($this->relationKeys[$namefield])) {
                 foreach ($this->relationKeys[$namefield] as $rel) {
-                    $idf = $namefield."_id";
+                    $idf = $namefield . "_id";
                     $this->add1Tm($idf, $rel);
                 }
             }
@@ -183,8 +189,8 @@ class BuildDBCommand extends Command
                 }
             }
             $titled = str_replace('_', '', Str::title($namefield));
-            $filename = resource_path('model_schemas/').$titled.'.json';
-            $contents = $this->prepend.$entry.$this->append.$this->relations.$this->finalize;
+            $filename = resource_path('model_schemas/') . $titled . '.json';
+            $contents = $this->prepend . $entry . $this->append . $this->relations . $this->finalize;
             $contents = Str::replaceLast('},]', '}]', $contents);
             file_put_contents($filename, $contents);
             $column = array_column($table, $i);
@@ -203,7 +209,7 @@ class BuildDBCommand extends Command
                 $plural = Str::plural(substr($fieldName, 0, strrpos($fieldName, '_')));
             }
             $ref = "name";
-            if($plural == "users") {
+            if ($plural == "users") {
                 $ref = "email";
             }
             return <<<END
@@ -220,7 +226,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['is_', '_must_', 'has_', 'autoplay_'])) {
+        } elseif (Str::contains($fieldName, ['is_', '_must_', 'has_', 'autoplay_'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -235,7 +241,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['prefer'])) {
+        } elseif (Str::contains($fieldName, ['prefer'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -250,7 +256,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['type', 'level', '_min', '_max', 'min_', 'max_', 'minimum_', 'maximum_', 'total_', '_count', 'status', 'point', 'views', 'score'])) {
+        } elseif (Str::contains($fieldName, ['type', 'level', '_min', '_max', 'min_', 'max_', 'minimum_', 'maximum_', 'total_', '_count', 'status', 'point', 'views', 'score'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -265,7 +271,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['reason', 'purpose', 'description', 'summary', 'comment', '_uri'])) {
+        } elseif (Str::contains($fieldName, ['reason', 'purpose', 'description', 'summary', 'comment', '_uri'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -280,7 +286,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['first_name', 'last_name', 'label'])) {
+        } elseif (Str::contains($fieldName, ['first_name', 'last_name', 'label'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -295,7 +301,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['phone', 'mobile'])) {
+        } elseif (Str::contains($fieldName, ['phone', 'mobile'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -310,7 +316,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['email'])) {
+        } elseif (Str::contains($fieldName, ['email'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -325,7 +331,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['color'])) {
+        } elseif (Str::contains($fieldName, ['color'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -340,7 +346,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['_date', 'birthday'])) {
+        } elseif (Str::contains($fieldName, ['_date', 'birthday'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -355,7 +361,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['_time', '_at'])) {
+        } elseif (Str::contains($fieldName, ['_time', '_at'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -370,7 +376,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['balance', 'wallet'])) {
+        } elseif (Str::contains($fieldName, ['balance', 'wallet'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -385,7 +391,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['password'])) {
+        } elseif (Str::contains($fieldName, ['password'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -400,7 +406,7 @@ class BuildDBCommand extends Command
             "inView": false
         },
         END;
-        } elseif(Str::contains($fieldName, ['title', 'caption', 'subtitle', 'names', 'token'])) {
+        } elseif (Str::contains($fieldName, ['title', 'caption', 'subtitle', 'names', 'token'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -415,12 +421,27 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['_file', 'file_', 'image_', 'picture_', 'document'])) {
+        } elseif (Str::contains($fieldName, ['name', 'other_names'])) {
+            return <<<END
+        {
+            "name": "$fieldName",
+            "dbType": "string,50:nullable",
+            "htmlType": "text",
+            "validations": "max:50",
+            "searchable": true,
+            "fillable": true,
+            "primary": false,
+            "inForm": true,
+            "inIndex": true,
+            "inView": true
+        },
+    END;
+        } elseif (Str::contains($fieldName, ['_file', 'file_', 'image_', 'picture_', 'document'])) {
             return <<<END
         {
             "name": "$fieldName",
             "dbType": "string,255:nullable",
-            "htmlType": "text",
+            "htmlType": "file",
             "validations": "max:10240|mimes:jpg,bmp,png,pdf,docx,xls,xlsx,jpeg,csv",
             "searchable": true,
             "fillable": true,
@@ -430,7 +451,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['_url', 'website', 'domain'])) {
+        } elseif (Str::contains($fieldName, ['_url', 'website', 'domain'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -445,7 +466,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(strpos($fieldName, 'ip_address') !== false) {
+        } elseif (strpos($fieldName, 'ip_address') !== false) {
             return <<<END
         {
             "name": "$fieldName",
@@ -460,7 +481,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(strpos($fieldName, 'text') !== false) {
+        } elseif (strpos($fieldName, 'text') !== false) {
             return <<<END
         {
             "name": "$fieldName",
@@ -475,7 +496,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif(Str::contains($fieldName, ['currency'])) {
+        } elseif (Str::contains($fieldName, ['currency'])) {
             return <<<END
         {
             "name": "$fieldName",

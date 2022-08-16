@@ -22,3 +22,40 @@ function robosys_google_sheet($id = null, $range = null) {
 
     return $array;
  }
+
+
+/**
+ * Scan a directory
+ * and return all file names.
+ *
+ * @param $path
+ * @param null $delimiter
+ * @return array
+ */
+function robosys_get_Files($path, $delimiter = ".")
+{
+
+    $filesPath = base_path($path);
+    $delimiter = $delimiter ?? Str::singular($path);
+
+    if(! is_dir($filesPath)){
+        return [];
+    }
+
+    $files = scandir($filesPath);
+
+    //strip off delimiter from file name.
+
+    $files = array_map(function($file) use($delimiter){
+        return explode($delimiter,$file)[0];
+    }, $files);
+
+    $files = array_filter($files, function($file){
+        if(in_array($file, ['.','..']) || strpos($file,'.json') || $file == null){
+            return false;
+        }
+
+        return true;
+    });
+    return array_values($files);
+}
