@@ -256,7 +256,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['type', 'level', '_min', '_max', 'min_', 'max_', 'minimum_', 'maximum_', 'total_', '_count', 'status', 'point', 'views', 'score'])) {
+        } elseif (Str::contains($fieldName, ['type', 'level', '_min', '_max', 'min_', 'max_', 'minimum_', 'maximum_', 'total_', '_count', 'status', 'point', 'views', 'score']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -376,7 +376,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['balance', 'wallet'])) {
+        } elseif (Str::contains($fieldName, ['balance', 'wallet', 'amount', 'cost', 'price', 'credit', 'debit'])) {
             return <<<END
         {
             "name": "$fieldName",
