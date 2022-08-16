@@ -1,0 +1,1 @@
+for /f %%f in ('dir /b resources\model_schemas\*.json') do php artisan infyom:api %%~nf --fieldsFile=resources\model_schemas\%%f --relations --no-interaction --skip="dump-autoload,menu"

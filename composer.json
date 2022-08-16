@@ -1,0 +1,49 @@
+{
+    "name": "robosys-labs/db-scaffolder",
+    "type": "library",
+    "description": "DB Application Scaffolder",
+    "keywords": [
+        "laravel",
+        "database",
+        "model",
+        "crud",
+        "generator"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Chibueze Opata",
+            "email": "c.opata@robosyslive.com"
+        }
+    ],
+    "require": {
+        "php": "^7.3|^8.0",
+        "illuminate/support": "^8.0|^9.0",
+        "google/apiclient": ">2.0",
+        "guzzlehttp/guzzle": ">6.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0|^9.3.3",
+        "mockery/mockery": "^1.3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Robosys\\DBScaffolder\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "\\Robosys\\DBScaffolder\\DBScaffolderServiceProvider"
+            ]
+        }
+    }
+}
