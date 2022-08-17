@@ -230,9 +230,24 @@ class BuildDBCommand extends Command
             return <<<END
         {
             "name": "$fieldName",
-            "dbType": "boolean",
+            "dbType": "boolean:default,0",
             "htmlType": "checkbox",
             "validations": "boolean",
+            "searchable": true,
+            "fillable": true,
+            "primary": false,
+            "inForm": true,
+            "inIndex": true,
+            "inView": true
+        },
+        END;
+        } elseif (Str::contains($fieldName, ['_time', '_at', 'last_login', 'last_active'])) {
+            return <<<END
+        {
+            "name": "$fieldName",
+            "dbType": "datetime:nullable",
+            "htmlType": "date",
+            "validations": "",
             "searchable": true,
             "fillable": true,
             "primary": false,
@@ -256,7 +271,22 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['type', 'level', '_num', 'freq', '_min', '_max', 'min_', 'max_', 'minimum_', 'maximum_', 'total_', '_count', 'status', 'point', 'views', 'discount', 'percent', 'score']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
+        } elseif (Str::contains($fieldName, ['type', 'level', 'freq', 'status', 'sort']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
+            return <<<END
+        {
+            "name": "$fieldName",
+            "dbType": "tinyInteger:unsigned:nullable",
+            "htmlType": "number",
+            "validations": "numeric|max:127",
+            "searchable": true,
+            "fillable": true,
+            "primary": false,
+            "inForm": true,
+            "inIndex": true,
+            "inView": true
+        },
+        END;
+        } elseif (Str::contains($fieldName, ['_num', '_max', 'max_', '_min', 'min_', 'minimum_', 'maximum_', 'total_', '_count', 'point', 'views', 'discount', 'percent', 'score']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -286,7 +316,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['first_name', 'last_name', 'label'])) {
+        } elseif (Str::contains($fieldName, ['first_name', 'last_name', 'label', 'code'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -351,21 +381,6 @@ class BuildDBCommand extends Command
         {
             "name": "$fieldName",
             "dbType": "date:nullable",
-            "htmlType": "date",
-            "validations": "",
-            "searchable": true,
-            "fillable": true,
-            "primary": false,
-            "inForm": true,
-            "inIndex": true,
-            "inView": true
-        },
-        END;
-        } elseif (Str::contains($fieldName, ['_time', '_at'])) {
-            return <<<END
-        {
-            "name": "$fieldName",
-            "dbType": "datetime:nullable",
             "htmlType": "date",
             "validations": "",
             "searchable": true,
