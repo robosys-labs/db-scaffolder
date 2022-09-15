@@ -100,11 +100,14 @@ class BuildDBCommand extends Command
     {
         $files = robosys_get_Files("resources/model_schemas");
         foreach ($files as $f) {
-            $model = $f;
-            $path = "resources/model_schemas/{$model}.json";
+            $model = preg_replace('/[0-9]+/', '', $f);
+            $path = "resources/model_schemas/{$f}.json";
             $this->info("scaffolding... $model");
             $out = shell_exec('"' . base_path('vendor/robosys-labs/db-scaffolder/fun.cmd') . '"' . " $model $path");
             $this->info($out);
+            $npath = "resources/model_schemas/{$model}.json";
+            if ($model == $f) continue;
+            rename(base_path($path), base_path($npath));
         }
     }
 
@@ -189,7 +192,8 @@ class BuildDBCommand extends Command
                 }
             }
             $titled = str_replace('_', '', Str::title($namefield));
-            $filename = resource_path('model_schemas/') . $titled . '.json';
+            //todo: number prefixing should be optional
+            $filename = resource_path('model_schemas/') . $i . $titled . '.json';
             $contents = $this->prepend . $entry . $this->append . $this->relations . $this->finalize;
             $contents = Str::replaceLast('},]', '}]', $contents);
             file_put_contents($filename, $contents);
@@ -271,7 +275,22 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['type', 'level', 'freq', 'status', 'sort']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
+        } elseif (Str::contains($fieldName, ['type'])) {
+            return <<<END
+        {
+            "name": "$fieldName",
+            "dbType": "tinyInteger:unsigned:nullable",
+            "htmlType": "number",
+            "validations": "numeric|min:1|max:17",
+            "searchable": true,
+            "fillable": true,
+            "primary": false,
+            "inForm": true,
+            "inIndex": true,
+            "inView": true
+        },
+        END;
+        } elseif (Str::contains($fieldName, ['level', 'freq', 'status', 'sort']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
             return <<<END
         {
             "name": "$fieldName",
