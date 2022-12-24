@@ -46,7 +46,7 @@ function robosys_google_sheet($id = null, $range = null) {
  * @param null $delimiter
  * @return array
  */
-function robosys_get_Files($path, $delimiter = ".")
+function robosys_get_Files($path, $delimiter = ".", $numericsort = true)
 {
 
     $filesPath = base_path($path);
@@ -71,5 +71,6 @@ function robosys_get_Files($path, $delimiter = ".")
 
         return true;
     });
-    return array_values($files);
+    $res = sort(array_values($files), $numericsort ? SORT_NUMERIC : SORT_REGULAR);
+    return $res;
 }
