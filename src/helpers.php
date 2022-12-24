@@ -71,6 +71,7 @@ function robosys_get_Files($path, $delimiter = ".", $numericsort = true)
 
         return true;
     });
-    $res = sort(array_values($files), $numericsort ? SORT_NUMERIC : SORT_REGULAR);
+    $res = array_values($files);    
+    sort($res, $numericsort ? SORT_NUMERIC : SORT_REGULAR);
     return $res;
 }
