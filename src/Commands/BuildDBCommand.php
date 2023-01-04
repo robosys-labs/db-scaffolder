@@ -305,7 +305,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['quantity', 'qty', '_num', '_max', 'max_', '_min', 'min_', 'minimum_', 'maximum_', 'total_', '_count', 'point', 'views', 'discount', 'percent', 'score']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
+        } elseif (Str::contains($fieldName, ['quantity', 'qty', '_num', '_max', 'max_', '_min', 'min_', 'minimum_', 'maximum_', 'total_', '_count', 'position', 'point', 'views', 'discount', 'percent', 'score']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -455,7 +455,7 @@ class BuildDBCommand extends Command
             "inView": false
         },
         END;
-        } elseif (Str::contains($fieldName, ['title', 'caption', 'subtitle', 'names', 'token'])) {
+        } elseif (Str::contains($fieldName, ['title', 'caption', 'subtitle', 'names', 'token', 'street'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -515,7 +515,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (strpos($fieldName, 'ip_address') !== false) {
+        } elseif (strpos($fieldName, 'ip_addr') !== false) {
             return <<<END
         {
             "name": "$fieldName",
