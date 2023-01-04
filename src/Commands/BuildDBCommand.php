@@ -395,7 +395,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['color'])) {
+        } elseif (Str::contains($fieldName, ['color', 'otp'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -410,7 +410,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['_date', 'birthday'])) {
+        } elseif (Str::contains($fieldName, ['_date', 'birthday', 'date_', '_dob', '_dob'])) {
             return <<<END
         {
             "name": "$fieldName",
