@@ -259,6 +259,21 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
+        } elseif (Str::contains($fieldName, ['_date', 'birthday', 'date_', '_dob', '_dob'])) {
+            return <<<END
+        {
+            "name": "$fieldName",
+            "dbType": "date:nullable",
+            "htmlType": "date",
+            "validations": "",
+            "searchable": true,
+            "fillable": true,
+            "primary": false,
+            "inForm": true,
+            "inIndex": true,
+            "inView": true
+        },
+        END;
         } elseif (Str::contains($fieldName, ['prefer', 'auto_'])) {
             return <<<END
         {
@@ -401,21 +416,6 @@ class BuildDBCommand extends Command
             "dbType": "char,6:nullable",
             "htmlType": "text",
             "validations": "min:6|max:6",
-            "searchable": true,
-            "fillable": true,
-            "primary": false,
-            "inForm": true,
-            "inIndex": true,
-            "inView": true
-        },
-        END;
-        } elseif (Str::contains($fieldName, ['_date', 'birthday', 'date_', '_dob', '_dob'])) {
-            return <<<END
-        {
-            "name": "$fieldName",
-            "dbType": "date:nullable",
-            "htmlType": "date",
-            "validations": "",
             "searchable": true,
             "fillable": true,
             "primary": false,
