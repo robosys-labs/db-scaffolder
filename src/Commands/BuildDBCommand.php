@@ -12,7 +12,7 @@ class BuildDBCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'magic {sheet? : The google sheet ID to build from} {range? : The sheet range e.g. "Sheet1!A1:AT21"} {--scaffold}';
+    protected $signature = 'magic {sheet? : The google sheet ID to build from} {range? : The sheet range e.g. "Sheet1!A1:AT21"} {--scaffold} {--html}';
 
     /**
      * The console command description.
@@ -76,10 +76,11 @@ class BuildDBCommand extends Command
      */
     public function handle()
     {
+        $hasWeb = $this->option('html') ?: false;
         $scaffold = $this->option('scaffold') ?: false;
         if ($scaffold === true) {
             //todo: if sheet is included, run sheet first
-            return $this->scaffold();
+            return $this->scaffold($hasWeb);
         }
         $sheet = $this->argument('sheet') ?: false;
         $pos = strpos($sheet, "sheet=");
@@ -95,14 +96,19 @@ class BuildDBCommand extends Command
         return 0;
     }
 
-    public function scaffold()
+    public function scaffold(bool $hasWeb = false)
     {
         $files = robosys_get_Files("resources/model_schemas");
         foreach ($files as $f) {
             $model = preg_replace('/[0-9]+/', '', $f);
             $path = "resources/model_schemas/{$f}.json";
             $this->info("scaffolding... $model");
-            $out = shell_exec('"' . base_path('vendor/robosys-labs/db-scaffolder/fun.cmd') . '"' . " $model $path");
+            //todo: generate cmd/bash automatically instead of using static files
+            if ($hasWeb) {
+                $out = shell_exec('"' . base_path('vendor/robosys-labs/db-scaffolder/funw.cmd') . '"' . " $model $path");
+            } else {
+                $out = shell_exec('"' . base_path('vendor/robosys-labs/db-scaffolder/fun.cmd') . '"' . " $model $path");
+            }
             $this->info($out);
             $npath = "resources/model_schemas/{$model}.json";
             if ($model == $f) continue;
