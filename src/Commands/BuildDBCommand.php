@@ -230,7 +230,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['in_', 'is_', '_must_', 'has_', 'autoplay_'])) {
+        } elseif (Str::contains($fieldName, ['in_', 'is_', 'must_', 'has_', 'autoplay_'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -260,7 +260,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['prefer'])) {
+        } elseif (Str::contains($fieldName, ['prefer', 'auto_'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -275,7 +275,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['type'])) {
+        } elseif (Str::contains($fieldName, ['type', 'role'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -290,7 +290,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['level', 'freq', 'status', 'sort']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
+        } elseif (Str::contains($fieldName, ['level', 'freq', 'status', 'sort', 'category']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -342,6 +342,21 @@ class BuildDBCommand extends Command
             "dbType": "string,35:nullable",
             "htmlType": "text",
             "validations": "max:35",
+            "searchable": true,
+            "fillable": true,
+            "primary": false,
+            "inForm": true,
+            "inIndex": true,
+            "inView": true
+        },
+        END;
+        } elseif (Str::contains($fieldName, ['hash', 'pin'])) {
+            return <<<END
+        {
+            "name": "$fieldName",
+            "dbType": "string,64:nullable",
+            "htmlType": "text",
+            "validations": "max:64",
             "searchable": true,
             "fillable": true,
             "primary": false,
@@ -410,7 +425,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['balance', 'wallet', 'amount', 'cost', 'price', 'credit', 'debit'])) {
+        } elseif (Str::contains($fieldName, ['balance', 'wallet', 'amount', 'cost', 'price', 'credit', 'debit', '_bal'])) {
             return <<<END
         {
             "name": "$fieldName",
