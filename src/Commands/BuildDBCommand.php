@@ -78,6 +78,7 @@ class BuildDBCommand extends Command
     {
         $scaffold = $this->option('scaffold') ?: false;
         if ($scaffold === true) {
+            //todo: if sheet is included, run sheet first
             return $this->scaffold();
         }
         $sheet = $this->argument('sheet') ?: false;
@@ -90,9 +91,7 @@ class BuildDBCommand extends Command
         if ($pos !== false) {
             $range = substr($range, 6);
         }
-        //todo
         $this->generate($sheet, $range);
-
         return 0;
     }
 
@@ -522,6 +521,21 @@ class BuildDBCommand extends Command
             "dbType": "char,15:nullable",
             "htmlType": "text",
             "validations": "ip",
+            "searchable": true,
+            "fillable": true,
+            "primary": false,
+            "inForm": true,
+            "inIndex": true,
+            "inView": true
+        },
+        END;
+        } elseif (strpos($fieldName, 'available_') === 0 && strrpos($fieldName, 's') === (strlen($fieldName) - 1)) {
+            return <<<END
+        {
+            "name": "$fieldName",
+            "dbType": "integer:unsigned:nullable",
+            "htmlType": "number",
+            "validations": "numeric",
             "searchable": true,
             "fillable": true,
             "primary": false,
