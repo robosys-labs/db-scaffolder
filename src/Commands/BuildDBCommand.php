@@ -230,7 +230,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['is_', '_must_', 'has_', 'autoplay_'])) {
+        } elseif (Str::contains($fieldName, ['in_', 'is_', '_must_', 'has_', 'autoplay_'])) {
             return <<<END
         {
             "name": "$fieldName",
@@ -305,7 +305,7 @@ class BuildDBCommand extends Command
             "inView": true
         },
         END;
-        } elseif (Str::contains($fieldName, ['_num', '_max', 'max_', '_min', 'min_', 'minimum_', 'maximum_', 'total_', '_count', 'point', 'views', 'discount', 'percent', 'score']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
+        } elseif (Str::contains($fieldName, ['quantity', 'qty', '_num', '_max', 'max_', '_min', 'min_', 'minimum_', 'maximum_', 'total_', '_count', 'point', 'views', 'discount', 'percent', 'score']) && !Str::contains($fieldName, ['amount', 'price', 'cost', 'credit', 'debit'])) {
             return <<<END
         {
             "name": "$fieldName",
